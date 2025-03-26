@@ -1,0 +1,59 @@
+```{r}
+library('fBasics')
+library('Matrix')
+library("matrixcalc")
+library("igraph")
+```
+
+```{r}
+n <- 6
+# g <- make_graph(edges = c(2, 1, 3, 1, 1, 4, 6, 4, 4, 5), n = n, directed = TRUE)
+g <- make_graph(edges = c(2, 1, 3, 1, 6, 4, 4, 5, 5, 6), n = n, directed = TRUE)
+
+lbs <- rep(0L,n) # Labels for the nodes, global variable
+maxc <- matrix(0,n,n) # Maximal classes, global variable
+```
+
+
+```{r}
+search_maximal_class <- function(adj_g,i,j) {
+  lbs[i] <<- 1
+  maxc[j,i] <<- i
+  
+  for(w in 1:n) {
+    if(adj_g[i,w] == 1 & !(w %in% maxc[j,])) {
+      search_maximal_class(adj_g,w,j)
+    }
+  }
+}
+
+get_maximal_class <- function(g) {
+  lbs <<- rep(0L,n)
+  maxc <<- matrix(0,n,n)
+  adj_g <- as_adjacency_matrix(g)
+  
+  num <- 0
+  
+  for(i in 1:n) {
+    if(all(adj_g[,i] == 0)) {
+      search_maximal_class(adj_g,i,i)
+      num <- num + 1
+    }
+  }
+  
+  for(i in 1:n){
+    # Loops
+    if(lbs[i] == 0) {
+      search_maximal_class(adj_g,i,i)
+      num <- num + 1
+    }
+  }
+  
+  print(paste("Number of maximal classes: ", num))
+  print(maxc)
+}
+```
+
+```{r}
+get_maximal_class(g)
+```
